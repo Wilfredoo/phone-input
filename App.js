@@ -9,17 +9,29 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  TouchableOpacity
+  TouchableOpacity,
+  TextInput
 } from "react-native";
 import { Container, Item, Input, Icon } from "native-base";
 import data from "./Countries";
 const defaultFlag = data.filter(obj => obj.name === "Germany")[0].flag;
 
+filterCountry = searchedCountry => {
+  const lowerSearchedCountry = searchedCountry.toLowerCase();
+
+  return data.filter(
+    country =>
+      country.name.toLowerCase().includes(lowerSearchedCountry) ||
+      country.dial_code.includes(lowerSearchedCountry)
+  );
+};
+
 export default class App extends React.Component {
   state = {
     flag: defaultFlag,
     modalVisible: false,
-    phoneNumber: ""
+    phoneNumber: "",
+    searchedCountry: ""
   };
 
   onChangeText(key, value) {
@@ -70,6 +82,12 @@ export default class App extends React.Component {
 
     this.setState({ users: filteredUsers, pals: filteredPals }, () => {
       console.warn(".");
+    });
+  };
+
+  handleChange = text => {
+    this.setState({ searchedCountry: text }, () => {
+      console.log("hi", this.state.text);
     });
   };
 
@@ -134,9 +152,12 @@ export default class App extends React.Component {
                           <TouchableOpacity onPress={() => this.hideModal()}>
                             <Icon name="arrow-back" />
                           </TouchableOpacity>
-                          <Input placeholder="Search" />
+                          <TextInput
+                            placeholder="Search"
+                            onChangeText={text => this.handleChange(text)}
+                          ></TextInput>
                           <FlatList
-                            data={countryData}
+                            data={filterCountry(this.state.searchedCountry)}
                             keyExtractor={(item, index) => index.toString()}
                             renderItem={({ item }) => (
                               <TouchableWithoutFeedback
